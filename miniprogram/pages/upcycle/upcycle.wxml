@@ -1,0 +1,95 @@
+<view class="page page--tab">
+  <view class="hero hero--pink">
+    <text class="hero-mascot">🧙</text>
+    <text class="hero-spark">✨</text>
+    <text class="hero-eyebrow">TAB 2 · 旧物魔法工坊</text>
+    <text class="hero-title">扔可惜？给它换个活法</text>
+    <text class="hero-sub">零成本改造 3 套方案，宿舍里就能动手</text>
+  </view>
+
+  <view class="card ai-status {{aiState.allConnected ? 'ai-status--on' : ''}}" wx:if="{{aiState}}">
+    <view class="row row--between">
+      <view class="row gap">
+        <text class="ai-dot">{{aiState.allConnected ? '🟢' : '🟠'}}</text>
+        <text class="bold">{{aiState.allConnected ? 'AI 模型已接入 · ' + (aiState.providerName || '云端') : '显示工作流未接入'}}</text>
+      </view>
+      <text class="tiny">WF-C · {{aiState.connectedCount}}/{{aiState.total}}</text>
+    </view>
+    <text class="tiny ai-hint">{{aiState.hint}}</text>
+    <text class="tiny ai-hint" wx:if="{{aiState.allConnected}}">WF-C 使用 {{aiState.textModel || '文本模型'}} · 密钥来源：{{aiState.keySource || '云端配置'}}</text>
+  </view>
+
+  <view class="card">
+    <view class="card-title"><text class="card-title-emoji">🪄</text><text>想改造什么？</text></view>
+    <view class="field">
+      <text class="field-label">旧物名字</text>
+      <input class="input" value="{{item}}" bindinput="onItemInput" placeholder="例：空快递纸箱 / 旧 T 恤 / 玻璃瓶" maxlength="20" />
+    </view>
+    <view class="field">
+      <text class="field-label">想用在哪儿</text>
+      <view class="chip-row">
+        <view wx:for="{{scenes}}" wx:key="*this" class="chip {{sceneIndex === index ? 'chip--on' : ''}}" data-index="{{index}}" bindtap="selectScene">{{item}}</view>
+      </view>
+    </view>
+    <view class="notice" style="margin:6rpx 0 18rpx">
+      <text>🌱</text>
+      <text>只用宿舍现有材料；不用明火与专业工具，剪刀会附安全提示。</text>
+    </view>
+    <button class="btn btn--primary btn--block" bindtap="generate" disabled="{{generating}}">{{generating ? '🪄 魔法酝酿中…' : '🪄 求 3 套改造方案'}}</button>
+  </view>
+
+  <view class="card" wx:if="{{generating}}">
+    <view class="skeleton skeleton-box"></view>
+    <view class="skeleton skeleton-line" style="margin-top:20rpx"></view>
+    <view class="skeleton skeleton-line"></view>
+    <view class="skeleton skeleton-line skeleton-line--short"></view>
+    <text class="tiny">正在生成 3 套改造思路…</text>
+  </view>
+
+  <view class="notice" wx:if="{{notice}}"><text>💡</text><text>{{notice}}</text></view>
+
+  <block wx:if="{{schemes.length > 0}}">
+    <view class="section-title">叮！3 套方案出炉啦 🎉</view>
+    <view wx:for="{{schemes}}" wx:key="name" class="card {{item.cardClass}} pop" style="animation-delay:{{item.delay}}ms">
+      <view class="sticker">方案 {{index + 1}}</view>
+      <view class="row row--between">
+        <view style="flex:1">
+          <text class="bold" style="font-size:32rpx">{{item.emoji}} {{item.name}}</text>
+          <view class="row row--wrap" style="margin-top:12rpx">
+            <text class="tag">{{item.difficulty}}</text>
+            <text class="tag tag--blue">⏱ 约 {{item.minutes}} 分钟</text>
+            <text class="tag tag--mint">🧰 {{item.materialCount}} 样材料</text>
+          </view>
+        </view>
+        <text style="font-size:54rpx">{{item.emoji}}</text>
+      </view>
+      <view class="divider"></view>
+      <text class="muted" style="display:block">{{item.green_note}}</text>
+      <view class="row gap" style="margin-top:18rpx">
+        <button class="btn btn--ghost btn--sm" style="flex:1" data-index="{{index}}" bindtap="openScheme">📖 看分步教程</button>
+        <button class="btn btn--yellow btn--sm" data-index="{{index}}" bindtap="toggleFav">{{item.favorited ? '⭐ 已收藏' : '☆ 收藏'}}</button>
+      </view>
+    </view>
+    <view class="card card--flat center">
+      <text class="tiny">效果图为占位卡，方案可正常使用</text>
+    </view>
+  </block>
+
+  <view class="empty" wx:elif="{{!generating}}">
+    <text class="empty-emoji">📦</text>
+    <text class="empty-title">纸箱还没开口说话</text>
+    <text class="empty-sub">输入一件旧物，让 AI 给它想三个新身份</text>
+    <button class="btn btn--yellow btn--sm" bindtap="fillExample">试试「空快递纸箱」</button>
+  </view>
+
+  <view class="card card--mint" bindtap="goFavorites">
+    <view class="row row--between">
+      <view>
+        <text class="bold" style="display:block;font-size:28rpx">⭐ 我的收藏与已完成</text>
+        <text class="tiny">已收藏 {{favCount}} 个 · 已改造 {{doneCount}} 件</text>
+      </view>
+      <text style="font-size:40rpx">→</text>
+    </view>
+  </view>
+  <view class="safe-bottom"></view>
+</view>

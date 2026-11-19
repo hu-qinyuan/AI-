@@ -1,0 +1,65 @@
+<view class="page" wx:if="{{scheme}}">
+  <view class="hero hero--mint">
+    <text class="hero-mascot">{{effectEmoji}}</text>
+    <text class="hero-spark">✨</text>
+    <text class="hero-eyebrow">DIY TUTORIAL · 方案 {{index + 1}}</text>
+    <text class="hero-title">{{scheme.name}}</text>
+    <text class="hero-sub">{{item}} · {{scene}} · 零成本动手</text>
+  </view>
+
+  <!-- 效果图：文生图接入前展示占位卡 -->
+  <view class="effect-card">
+    <image wx:if="{{scheme.effect_image}}" class="effect-image" src="{{scheme.effect_image}}" mode="aspectFill"></image>
+    <block wx:else>
+      <text class="effect-emoji">{{effectEmoji}}</text>
+      <text class="effect-label">效果图占位 · 脑补一下成品 🖼️</text>
+    </block>
+  </view>
+
+  <view class="card">
+    <view class="row row--wrap">
+      <text class="tag">{{scheme.difficulty}}</text>
+      <text class="tag tag--blue">⏱ 约 {{scheme.minutes}} 分钟</text>
+      <text class="tag tag--mint">📋 {{scheme.stepCount}} 步</text>
+      <text class="tag tag--purple">🌱 零成本</text>
+    </view>
+  </view>
+
+  <view class="card card--yellow">
+    <view class="card-title"><text class="card-title-emoji">🧰</text><text>要准备的东西</text></view>
+    <view class="row row--wrap">
+      <text wx:for="{{scheme.materials}}" wx:key="*this" class="tag tag--mint">{{item}}</text>
+    </view>
+    <text class="tiny" style="display:block;margin-top:10rpx">优先用宿舍现有物，不需要网购专业工具</text>
+  </view>
+
+  <view class="card">
+    <view class="card-title"><text class="card-title-emoji">📖</text><text>一步一步来</text></view>
+    <view class="step-row" wx:for="{{scheme.steps}}" wx:key="*this">
+      <view class="step-num">{{index + 1}}</view>
+      <text class="step-text">{{item}}</text>
+    </view>
+  </view>
+
+  <view class="card card--mint">
+    <text class="bold">🌍 减碳小账本</text>
+    <text class="muted" style="display:block;margin-top:8rpx">{{scheme.green_note}}</text>
+    <text class="tiny" style="display:block;margin-top:10rpx">估算值，仅作展示</text>
+  </view>
+
+  <view class="row gap">
+    <button class="btn btn--yellow" style="flex:1" bindtap="toggleFav">{{favorited ? '⭐ 已收藏' : '☆ 收藏方案'}}</button>
+    <button class="btn btn--primary" style="flex:1" bindtap="markDone" disabled="{{done}}">{{done ? '✅ 已改造' : '🙌 我做完啦'}}</button>
+  </view>
+  <button class="btn btn--ghost btn--block btn--sm" style="margin-top:18rpx" open-type="share">📤 分享给室友</button>
+  <view class="safe-bottom"></view>
+</view>
+
+<view class="page" wx:else>
+  <view class="empty">
+    <text class="empty-emoji">🫧</text>
+    <text class="empty-title">方案卡片飞走了</text>
+    <text class="empty-sub">回工坊重新求一套吧</text>
+    <button class="btn btn--primary btn--sm" bindtap="goBack">回魔法工坊</button>
+  </view>
+</view>

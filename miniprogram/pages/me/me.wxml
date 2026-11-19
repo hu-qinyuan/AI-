@@ -1,0 +1,69 @@
+<view class="page page--tab">
+  <view class="hero hero--pink">
+    <text class="hero-mascot">🏅</text>
+    <text class="hero-spark">✨</text>
+    <text class="hero-eyebrow">TAB 4 · 我的局子</text>
+    <text class="hero-title">嗨，{{profile.nickname}}</text>
+    <text class="hero-sub">{{profile.college}} · {{profile.building}}</text>
+  </view>
+
+  <!-- 碳减排成就卡 -->
+  <view class="achieve-card">
+    <view class="sticker">{{level.emoji}} {{level.name}}</view>
+    <text class="achieve-label">累计折算减碳</text>
+    <view class="row" style="align-items:baseline;gap:8rpx">
+      <text class="achieve-number">{{carbon.carbonKg}}</text>
+      <text class="achieve-unit">kg CO₂e</text>
+    </view>
+    <view class="progress-track"><view class="progress-fill" style="width:{{percent}}%"></view></view>
+    <text class="achieve-next" wx:if="{{nextLevel}}">再攒一点就升级成 {{nextLevel.emoji}} {{nextLevel.name}} 啦</text>
+    <text class="achieve-next" wx:else>已经是最高等级，书院守护者就是你 🏆</text>
+    <text class="achieve-note">估算值，仅作展示</text>
+  </view>
+
+  <!-- 三个计数 -->
+  <view class="stat-row">
+    <view class="stat-card stat-card--yellow"><text class="stat-emoji">📦</text><text class="stat-num">{{stats.posted}}</text><text class="stat-label">发布件数</text></view>
+    <view class="stat-card stat-card--mint"><text class="stat-emoji">🎁</text><text class="stat-num">{{stats.granted}}</text><text class="stat-label">成功流转</text></view>
+    <view class="stat-card stat-card--blue"><text class="stat-emoji">🤝</text><text class="stat-num">{{stats.mutualDone}}</text><text class="stat-label">互助完成</text></view>
+  </view>
+
+  <view class="card">
+    <view class="card-title"><text class="card-title-emoji">🗂️</text><text>我的资产</text></view>
+    <view class="menu-row" data-type="posts" bindtap="goList">
+      <text class="menu-emoji">📷</text><text class="menu-text">我的发布</text><text class="menu-count">{{stats.posted}} 件</text><text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-row" data-type="mutual" bindtap="goList">
+      <text class="menu-emoji">🤝</text><text class="menu-text">我的互助</text><text class="menu-count">{{mutualCount}} 条</text><text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-row" data-type="favorites" bindtap="goList">
+      <text class="menu-emoji">⭐</text><text class="menu-text">改造收藏夹</text><text class="menu-count">{{stats.favorites}} 个</text><text class="menu-arrow">›</text>
+    </view>
+  </view>
+
+  <view class="empty" wx:if="{{stats.posted === 0 && mutualCount === 0 && stats.favorites === 0}}">
+    <text class="empty-emoji">🌱</text>
+    <text class="empty-title">你的局子还没开张</text>
+    <text class="empty-sub">发第一件闲置，点亮成就</text>
+    <button class="btn btn--primary btn--sm" bindtap="goPost">去发第一件 ✨</button>
+  </view>
+
+  <!-- 归属设置：楼栋 / 房间号，修改后本机 + 云端长久保存 -->
+  <view class="card card--flat">
+    <view class="card-title"><text class="card-title-emoji">⚙️</text><text>我的归属</text></view>
+    <view class="field">
+      <text class="field-label">所在楼栋</text>
+      <picker range="{{buildings}}" value="{{buildingIndex}}" bindchange="changeBuilding">
+        <view class="picker">{{profile.building}}<text class="picker-arrow">▾</text></view>
+      </picker>
+    </view>
+    <view class="field">
+      <text class="field-label">房间号 <text class="tiny">对外隐藏</text></text>
+      <input class="input" value="{{room}}" bindinput="onRoomInput" placeholder="例：312" maxlength="10" />
+    </view>
+    <text class="tiny setting-note">已长久保存，发布闲置时自动带上。</text>
+    <view class="btn btn--ghost btn--block btn--sm" bindtap="resetDemo" wx:if="{{modeText !== '云开发'}}">🔄 重置演示数据</view>
+  </view>
+
+  <view class="safe-bottom"></view>
+</view>

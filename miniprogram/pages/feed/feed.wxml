@@ -1,0 +1,97 @@
+<view class="page">
+  <view class="hero hero--mint">
+    <text class="hero-mascot">🏘️</text>
+    <text class="hero-spark">✨</text>
+    <text class="hero-eyebrow">COMMUNITY FEED</text>
+    <text class="hero-title">楼上楼下，好物在传</text>
+    <text class="hero-sub">只在书院内流转，当面交付、顺手带走</text>
+  </view>
+
+  <view class="card card--flat">
+    <input class="input" value="{{keyword}}" bindinput="onKeywordInput" bindconfirm="load" placeholder="🔍 搜搜台灯、教材、耳机…" />
+    <view class="row row--between" style="margin-top:18rpx">
+      <view class="chip-row">
+        <view class="chip {{scopeIndex === 0 ? 'chip--on' : ''}}" data-index="0" bindtap="switchScope">本楼栋</view>
+        <view class="chip {{scopeIndex === 1 ? 'chip--on' : ''}}" data-index="1" bindtap="switchScope">本书院</view>
+      </view>
+      <text class="tiny">共 {{total}} 件</text>
+    </view>
+    <scroll-view scroll-x class="cat-scroll" style="margin-top:18rpx">
+      <view class="chip-row" style="flex-wrap:nowrap">
+        <view wx:for="{{categories}}" wx:key="*this" class="chip {{categoryIndex === index ? 'chip--on' : ''}}" data-index="{{index}}" bindtap="selectCategory">{{item}}</view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <view wx:if="{{loading}}" class="card">
+    <view class="skeleton skeleton-box"></view>
+    <view class="skeleton skeleton-line" style="margin-top:20rpx"></view>
+    <view class="skeleton skeleton-line skeleton-line--short"></view>
+  </view>
+
+  <block wx:elif="{{list.length > 0}}">
+    <view class="item-card pop" wx:for="{{list}}" wx:key="_id" bindtap="openDetail" data-index="{{index}}">
+      <view class="sticker" wx:if="{{item.status !== 'on_shelf'}}">{{item.statusText}}</view>
+      <view class="item-head">
+        <view class="item-cover">
+          <image wx:if="{{item.hasImage}}" class="item-cover-image" src="{{item.imagePath}}" mode="aspectFill"></image>
+          <text wx:else>{{item.coverEmoji}}</text>
+        </view>
+        <view class="item-main">
+          <text class="item-title">{{item.title}}</text>
+          <text class="item-desc">{{item.desc}}</text>
+          <view class="row row--wrap" style="margin-top:8rpx">
+            <text wx:for="{{item.tags}}" wx:for-item="tag" wx:key="*this" class="tag tag--purple">{{tag}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="item-foot">
+        <text class="item-meta">📍 {{item.publicLocation}} · {{item.timeText}} · {{item.dealMode}}</text>
+        <text class="price {{item.price === 0 ? 'price--free' : ''}}">{{item.priceText}}</text>
+      </view>
+    </view>
+    <view class="btn btn--ghost btn--block btn--sm" wx:if="{{list.length < total}}" bindtap="loadMore">再翻一页 ↓</view>
+  </block>
+
+  <view class="empty" wx:else>
+    <text class="empty-emoji">🫙</text>
+    <text class="empty-title">这一格还空着</text>
+    <text class="empty-sub">换个类别，或者成为第一个在这儿放东西的人</text>
+    <button class="btn btn--primary btn--sm" bindtap="goPost">去发布一件 ✨</button>
+  </view>
+
+  <view class="notice" style="margin-top:20rpx">
+    <text>🔒</text>
+    <text>房间号对外隐藏，仅发布者本人可见。</text>
+  </view>
+
+  <!-- 详情弹层 -->
+  <view class="mask" wx:if="{{showDetail}}" bindtap="closeDetail">
+    <view class="sheet" catchtap="noop">
+      <view class="sheet-handle"></view>
+      <view class="center" wx:if="{{detailItem}}">
+        <view class="detail-cover">
+          <image wx:if="{{detailItem.hasImage}}" class="item-cover-image" src="{{detailItem.imagePath}}" mode="aspectFill"></image>
+          <text wx:else>{{detailItem.coverEmoji}}</text>
+        </view>
+        <text class="bold" style="display:block;font-size:34rpx;margin-top:18rpx">{{detailItem.title}}</text>
+        <text class="muted" style="display:block;margin:10rpx 0 18rpx">{{detailItem.desc}}</text>
+        <view class="row row--wrap" style="justify-content:center">
+          <text class="tag">{{detailItem.category}}</text>
+          <text class="tag tag--mint">{{detailItem.condition}}</text>
+          <text class="tag tag--blue">{{detailItem.dealMode}}</text>
+        </view>
+        <view class="card card--yellow" style="text-align:left;margin-top:22rpx">
+          <text class="muted">📍 取件范围：{{detailItem.publicLocation}}</text>
+          <text class="muted" wx:if="{{detailItem.ownerLocation}}" style="display:block;margin-top:8rpx">🔑 你的取件位置：{{detailItem.ownerLocation}}</text>
+          <text class="muted" style="display:block;margin-top:8rpx">🕒 {{detailItem.timeText}} · 当面交付</text>
+        </view>
+        <view class="row gap" style="margin-top:20rpx">
+          <button class="btn btn--primary" style="flex:1" bindtap="wantIt">🙋 我想要</button>
+          <button class="btn btn--ghost btn--sm" bindtap="reportIt">举报</button>
+        </view>
+      </view>
+    </view>
+  </view>
+  <view class="safe-bottom"></view>
+</view>

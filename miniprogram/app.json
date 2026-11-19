@@ -1,0 +1,53 @@
+{
+  "pages": [
+    "pages/post/post",
+    "pages/upcycle/upcycle",
+    "pages/mutual/mutual",
+    "pages/me/me",
+    "pages/feed/feed",
+    "pages/scheme/scheme",
+    "pages/my-list/my-list"
+  ],
+  "window": {
+    "navigationBarTitleText": "AI宿造局",
+    "navigationBarBackgroundColor": "#FFF3DC",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#FFF8EC",
+    "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "color": "#A08B79",
+    "selectedColor": "#F4662C",
+    "backgroundColor": "#FFFDF7",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/post/post",
+        "text": "智造发布",
+        "iconPath": "images/tab-post.png",
+        "selectedIconPath": "images/tab-post-on.png"
+      },
+      {
+        "pagePath": "pages/upcycle/upcycle",
+        "text": "魔法工坊",
+        "iconPath": "images/tab-upcycle.png",
+        "selectedIconPath": "images/tab-upcycle-on.png"
+      },
+      {
+        "pagePath": "pages/mutual/mutual",
+        "text": "互助广场",
+        "iconPath": "images/tab-mutual.png",
+        "selectedIconPath": "images/tab-mutual-on.png"
+      },
+      {
+        "pagePath": "pages/me/me",
+        "text": "我的局子",
+        "iconPath": "images/tab-me.png",
+        "selectedIconPath": "images/tab-me-on.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

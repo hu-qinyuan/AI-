@@ -1,0 +1,9 @@
+{
+  "name": "ai-suzaoju-cloudfunction",
+  "version": "1.0.0",
+  "description": "AI宿造局微信云开发云函数",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

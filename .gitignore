@@ -1,0 +1,12 @@
+# 本地密钥 / 云函数密钥 / 临时探测产物（绝不提交）
+tools/ai-env.json
+**/ai.secret.json
+tools/.tokenhub-models.json
+tools/.probe-tokenhub.js
+tools/.e2e-real.js
+tools/check-ai-output.json
+
+# 依赖与工具缓存
+node_modules/
+.cloudbase/
+*.log

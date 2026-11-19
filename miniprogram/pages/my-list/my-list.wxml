@@ -1,0 +1,95 @@
+<view class="page">
+  <view class="hero hero--mint">
+    <text class="hero-mascot">{{heroEmoji}}</text>
+    <text class="hero-eyebrow">MY STUFF</text>
+    <text class="hero-title">{{title}}</text>
+    <text class="hero-sub">共 {{count}} 条 · 数据会跟着状态实时更新</text>
+  </view>
+
+  <!-- 我的发布 -->
+  <block wx:if="{{type === 'posts'}}">
+    <view class="item-card" wx:for="{{list}}" wx:key="_id">
+      <view class="item-head">
+        <view class="item-cover">
+          <image wx:if="{{item.hasImage}}" class="item-cover-image" src="{{item.imagePath}}" mode="aspectFill"></image>
+          <text wx:else>{{item.coverEmoji}}</text>
+        </view>
+        <view class="item-main">
+          <view class="row row--between">
+            <text class="item-title">{{item.title}}</text>
+            <text class="badge {{item.statusClass}}">{{item.statusText}}</text>
+          </view>
+          <text class="item-desc">{{item.desc}}</text>
+          <view class="row row--wrap" style="margin-top:8rpx">
+            <text class="tag">{{item.category}}</text>
+            <text class="tag tag--blue">{{item.condition}}</text>
+            <text class="price {{item.price === 0 ? 'price--free' : ''}}">{{item.priceText}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="item-foot">
+        <text class="item-meta">📍 {{item.publicLocation}} · {{item.timeText}}</text>
+        <view class="row gap">
+          <button wx:if="{{item.status === 'on_shelf'}}" class="btn btn--primary btn--sm" data-action="granted" data-id="{{item._id}}" bindtap="postAction">标记已送出</button>
+          <button wx:if="{{item.status === 'on_shelf'}}" class="btn btn--ghost btn--sm" data-action="off_shelf" data-id="{{item._id}}" bindtap="postAction">下架</button>
+          <button wx:else class="btn btn--ghost btn--sm" data-action="on_shelf" data-id="{{item._id}}" bindtap="postAction">重新上架</button>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- 我的互助 -->
+  <block wx:elif="{{type === 'mutual'}}">
+    <view class="item-card" wx:for="{{list}}" wx:key="_id">
+      <view class="row row--between" style="margin-bottom:10rpx">
+        <view class="row gap">
+          <text class="badge badge--blue">{{item.type}}</text>
+          <text class="badge {{item.statusClass}}">{{item.statusText}}</text>
+          <text class="badge badge--gray">{{item.isMine ? '我发起的' : '我接的单'}}</text>
+        </view>
+        <text class="tiny">{{item.timeText}}</text>
+      </view>
+      <text class="bold" style="font-size:29rpx">{{item.title}}</text>
+      <text class="muted" style="display:block;margin-top:6rpx">{{item.demand}}</text>
+      <text class="meta-line">🕒 {{item.timeText}} / {{item.timeStart}} · 📍 {{item.location}}</text>
+      <view class="row gap" style="margin-top:16rpx">
+        <button wx:if="{{item.canFinish}}" class="btn btn--primary btn--sm" data-action="finish" data-id="{{item._id}}" bindtap="mutualAction">✅ 标记完成</button>
+        <button wx:if="{{item.canCancel}}" class="btn btn--ghost btn--sm" data-action="cancel" data-id="{{item._id}}" bindtap="mutualAction">取消</button>
+      </view>
+    </view>
+  </block>
+
+  <!-- 改造收藏夹 -->
+  <block wx:else>
+    <view class="item-card" wx:for="{{list}}" wx:key="_id">
+      <view class="item-head">
+        <view class="item-cover">🧙</view>
+        <view class="item-main">
+          <view class="row row--between">
+            <text class="item-title">{{item.schemeName}}</text>
+            <text class="badge {{item.done ? 'badge--green' : ''}}">{{item.done ? '已改造 ✅' : '待动手'}}</text>
+          </view>
+          <text class="item-desc">由「{{item.item}}」改造 · 场景：{{item.scene || '收纳'}}</text>
+          <text class="tiny" style="display:block;margin-top:8rpx">完成 1 件约折算 1.0kg 减碳（估算值）</text>
+        </view>
+      </view>
+      <view class="item-foot">
+        <text class="item-meta">收藏于 {{item.timeText}}</text>
+        <button class="btn btn--yellow btn--sm" bindtap="goUpcycle">去工坊</button>
+      </view>
+    </view>
+  </block>
+
+  <view class="empty" wx:if="{{list.length === 0}}">
+    <text class="empty-emoji">{{emptyEmoji}}</text>
+    <text class="empty-title">{{emptyTitle}}</text>
+    <text class="empty-sub">从下面这个按钮开始就好</text>
+    <button class="btn btn--primary btn--sm" bindtap="goCreate">{{emptyButton}}</button>
+  </view>
+
+  <view class="notice" wx:if="{{type === 'posts'}}">
+    <text>🎁</text>
+    <text>标记「已送出」后自动计入减碳成就。</text>
+  </view>
+  <view class="safe-bottom"></view>
+</view>

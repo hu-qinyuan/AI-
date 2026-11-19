@@ -1,0 +1,3 @@
+.card--yellow { background: #FFF6D8; }
+.card--mint { background: #E7FBF1; }
+.card--purple { background: #F3EEFF; }

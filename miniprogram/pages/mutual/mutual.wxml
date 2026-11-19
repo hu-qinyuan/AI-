@@ -1,0 +1,192 @@
+<view class="page page--tab">
+  <view class="hero hero--blue">
+    <text class="hero-mascot">🤝</text>
+    <text class="hero-spark">✨</text>
+    <text class="hero-eyebrow">TAB 3 · 碎片互助广场</text>
+    <text class="hero-title">说句话，就有人接</text>
+    <text class="hero-sub">带饭、借工具、拼单、代取快递，都别再被群聊刷掉</text>
+  </view>
+
+  <!-- AI 接入状态：已接入显示真实模型，未接入明确显示原因 -->
+  <view class="card ai-status {{aiState.allConnected ? 'ai-status--on' : ''}}" wx:if="{{aiState}}" bindtap="toggleState">
+    <view class="row row--between">
+      <view class="row gap">
+        <text class="ai-dot">{{aiState.allConnected ? '🟢' : '🟠'}}</text>
+        <text class="bold">{{aiState.allConnected ? 'AI 模型已接入 · ' + (aiState.providerName || '云端') : '显示工作流未接入'}}</text>
+      </view>
+      <text class="tiny">{{aiState.connectedCount}}/{{aiState.total}} 条通道 {{stateExpanded ? '收起 ▴' : '详情 ▾'}}</text>
+    </view>
+    <text class="tiny ai-hint">{{aiState.hint}}</text>
+    <block wx:if="{{stateExpanded}}">
+      <view class="ai-line" wx:for="{{aiState.channelList}}" wx:key="key">
+        <text>{{item.icon}} {{item.label}}</text>
+        <text class="tiny">{{item.statusText}}</text>
+      </view>
+      <view class="ai-guide" wx:if="{{!aiState.allConnected}}">
+        <text class="tiny">配置 AI_PROVIDER=tokenhub + AI_API_KEY（或 WF_A_URL / WF_B_URL / WF_C_URL），重新部署云函数即可。</text>
+      </view>
+      <view class="ai-guide" wx:if="{{aiState.allConnected}}">
+        <text class="tiny">视觉 {{aiState.visionModel || '未配置'}} · 文本 {{aiState.textModel || '未配置'}} · 密钥 {{aiState.keySource || '云端'}}</text>
+      </view>
+    </block>
+  </view>
+
+  <!-- 输入区 -->
+  <view class="card">
+    <view class="card-title"><text class="card-title-emoji">💬</text><text>用大白话说一句</text></view>
+    <textarea class="textarea" value="{{rawText}}" bindinput="onRawInput" maxlength="100" placeholder="例：明天谁去二食堂，求带个肉包，重谢" />
+    <view class="sample-row">
+      <view wx:for="{{samples}}" wx:key="*this" class="chip chip--sample" data-text="{{item}}" bindtap="useSample">{{item}}</view>
+    </view>
+    <view class="row row--between" style="margin-top:16rpx">
+      <view class="btn btn--ghost btn--sm {{recording ? 'btn--recording' : ''}}" bindtouchstart="startRecord" bindtouchend="stopRecord" bindtouchcancel="stopRecord">{{speechBusy ? '⏳ 转文字中…' : (recording ? '🔴 松手结束' : '🎙️ 长按说话')}}</view>
+      <text class="tiny">{{rawTextLength}} / 100</text>
+    </view>
+    <text class="tiny speech-tip {{speechReady ? '' : 'speech-tip--warn'}}" wx:if="{{speechTip}}">{{speechTip}}</text>
+    <view class="live-text" wx:if="{{recording && liveText}}">{{liveText}}</view>
+    <button class="btn btn--primary btn--block" style="margin-top:20rpx" bindtap="generate" disabled="{{generating}}">{{generating ? '🧠 AI 正在拆你的话…' : '🪄 生成互助卡'}}</button>
+  </view>
+
+  <view class="card" wx:if="{{generating}}">
+    <view class="skeleton skeleton-line"></view>
+    <view class="skeleton skeleton-line skeleton-line--short"></view>
+    <view class="skeleton skeleton-box" style="margin-top:12rpx"></view>
+  </view>
+
+  <view class="notice" wx:if="{{notice}}"><text>💡</text><text>{{notice}}</text></view>
+
+  <!-- 结构化卡片预览 + 微调 -->
+  <view class="card card--yellow pop" wx:if="{{showCard}}">
+    <view class="sticker">AI 填好啦 · 可改 ✍️</view>
+    <view class="card-title"><text class="card-title-emoji">🗂️</text><text>互助卡预览</text></view>
+    <view class="preview-card">
+      <view class="row row--between">
+        <view class="row gap">
+          <text class="badge badge--blue">{{card.type}}</text>
+          <text class="badge">{{card.urgency}}</text>
+        </view>
+        <text class="tiny">{{card.scope}}</text>
+      </view>
+      <text class="bold" style="display:block;font-size:32rpx;margin-top:14rpx">{{card.title}}</text>
+      <text class="muted" style="display:block;margin-top:6rpx">{{card.demand}}</text>
+      <view class="divider"></view>
+      <text class="meta-line">🕒 {{card.timeLabel || card.timeStart || '时间待补'}}</text>
+      <text class="meta-line" wx:if="{{card.timeSlot}}">⏰ 时段：{{card.timeSlot}}</text>
+      <text class="meta-line">📍 {{card.location || '地点待补'}}{{card.locationDetail ? '（' + card.locationDetail + '）' : ''}}</text>
+      <text class="meta-line" wx:if="{{routeText}}">🧭 {{routeText}}</text>
+      <text class="meta-line">🎁 {{card.reward || '酬劳未提'}}</text>
+      <text class="meta-line">👀 可见范围：{{card.scope}}</text>
+    </view>
+
+    <view class="detect-box">
+      <text class="tiny">🧠 解析明细：{{detectedText}}</text>
+      <text class="tiny">来源：{{sourceText}} · 字段置信度 {{confidenceText}}</text>
+    </view>
+
+    <view class="notice notice--warn" wx:if="{{missingText}}">
+      <text>⚠️</text><text>AI 没看出来：{{missingText}}。留空不编造，请在下方补齐再发布（也可改原话重新生成）。</text>
+    </view>
+
+    <view class="field">
+      <text class="field-label">标题</text>
+      <input class="input" value="{{card.title}}" data-field="title" bindinput="onCardInput" maxlength="20" />
+    </view>
+    <view class="field">
+      <text class="field-label">类型</text>
+      <picker range="{{types}}" value="{{typeIndex}}" bindchange="onTypeChange">
+        <view class="picker">{{card.type}}<text class="picker-arrow">▾</text></view>
+      </picker>
+    </view>
+    <view class="field">
+      <text class="field-label">时间原文 / 归一化日期</text>
+      <view class="row gap">
+        <input class="input" style="flex:1" value="{{card.timeText}}" data-field="timeText" bindinput="onCardInput" placeholder="明天" />
+        <picker mode="date" value="{{card.timeStart}}" bindchange="onDateChange">
+          <view class="chip">{{card.timeStart || '选日期'}}</view>
+        </picker>
+      </view>
+    </view>
+    <view class="field">
+      <text class="field-label">具体时段 <text class="tiny">（如 晚上7点前 / 中午）</text></text>
+      <input class="input" value="{{card.timeSlot}}" data-field="timeSlot" bindinput="onCardInput" placeholder="没提就留空" maxlength="20" />
+    </view>
+    <view class="field">
+      <text class="field-label">地点</text>
+      <input class="input" value="{{card.location}}" data-field="location" bindinput="onCardInput" placeholder="二食堂" maxlength="20" />
+      <input class="input" style="margin-top:12rpx" value="{{card.locationDetail}}" data-field="locationDetail" bindinput="onCardInput" placeholder="补充：门口 / 楼下 / 312" maxlength="20" />
+      <view class="row gap" style="margin-top:12rpx">
+        <input class="input" style="flex:1" value="{{card.fromPlace}}" data-field="fromPlace" bindinput="onCardInput" placeholder="起点（选填）" maxlength="20" />
+        <text class="tiny">→</text>
+        <input class="input" style="flex:1" value="{{card.toPlace}}" data-field="toPlace" bindinput="onCardInput" placeholder="终点（选填）" maxlength="20" />
+      </view>
+    </view>
+    <view class="field">
+      <text class="field-label">酬劳 / 需求细节</text>
+      <input class="input" value="{{card.reward}}" data-field="reward" bindinput="onCardInput" placeholder="重谢 / 请喝奶茶" maxlength="20" />
+      <input class="input" style="margin-top:12rpx" value="{{card.demand}}" data-field="demand" bindinput="onCardInput" placeholder="具体要帮什么" maxlength="40" />
+    </view>
+    <view class="field">
+      <text class="field-label">可见范围</text>
+      <view class="chip-row">
+        <view wx:for="{{scopes}}" wx:key="*this" class="chip {{card.scope === item ? 'chip--on' : ''}}" data-value="{{item}}" bindtap="selectScope">{{item}}</view>
+      </view>
+    </view>
+    <view class="field">
+      <text class="field-label">紧急度</text>
+      <view class="chip-row">
+        <view wx:for="{{urgencies}}" wx:key="*this" class="chip {{card.urgency === item ? 'chip--on' : ''}}" data-value="{{item}}" bindtap="selectUrgency">{{item}}</view>
+      </view>
+    </view>
+    <view class="row gap">
+      <button class="btn btn--ghost btn--sm" style="flex:1" bindtap="saveCardImage">🖼️ 生成卡片图片</button>
+      <button class="btn btn--yellow btn--sm" style="flex:1" bindtap="publish">📣 发到广场</button>
+    </view>
+    <text class="tiny center" style="display:block;margin-top:12rpx">可保存相册或转发</text>
+  </view>
+
+  <!-- 离屏画布：用于生成可分享的互助卡片图 -->
+  <canvas type="2d" id="cardCanvas" class="card-canvas"></canvas>
+
+  <!-- 信息流 -->
+  <view class="section-title">广场上的互助 🫶</view>
+  <view class="chip-row" style="margin-bottom:20rpx">
+    <view wx:for="{{filters}}" wx:key="*this" class="chip {{filterIndex === index ? 'chip--on' : ''}}" data-index="{{index}}" bindtap="selectFilter">{{item}}</view>
+  </view>
+
+  <block wx:if="{{list.length > 0}}">
+    <view class="item-card pop" wx:for="{{list}}" wx:key="_id">
+      <view class="row row--between" style="margin-bottom:12rpx">
+        <view class="row gap">
+          <text class="badge badge--blue">{{item.type}}</text>
+          <text class="badge {{item.statusClass}}">{{item.statusText}}</text>
+          <text class="badge badge--gray" wx:if="{{item.expired}}">已过期</text>
+        </view>
+        <text class="tiny">{{item.createdText}}</text>
+      </view>
+      <text class="bold" style="font-size:30rpx">{{item.title}}</text>
+      <text class="muted" style="display:block;margin-top:6rpx">{{item.demand}}</text>
+      <view class="quote" wx:if="{{item.expanded}}">「{{item.rawText}}」</view>
+      <view class="meta-box" wx:if="{{item.expanded}}">
+        <text class="meta-line">🕒 {{item.timeLabel || item.timeStart || '待定'}}</text>
+        <text class="meta-line">📍 {{item.location || '待补'}} · 👀 {{item.scope}}</text>
+        <text class="meta-line" wx:if="{{item.fromPlace}}">🧭 {{item.fromPlace}} → {{item.toPlace}}</text>
+        <text class="meta-line">🎁 {{item.reward || '未提酬劳'}} · {{item.urgency}}</text>
+      </view>
+      <view class="row gap" style="margin-top:16rpx;flex-wrap:wrap">
+        <button wx:if="{{item.canTake}}" class="btn btn--mint btn--sm" data-action="take" data-id="{{item._id}}" bindtap="doAction">🙋 我来接</button>
+        <button wx:if="{{item.canFinish}}" class="btn btn--primary btn--sm" data-action="finish" data-id="{{item._id}}" bindtap="doAction">✅ 标记完成</button>
+        <button wx:if="{{item.canCancel}}" class="btn btn--ghost btn--sm" data-action="cancel" data-id="{{item._id}}" bindtap="doAction">取消</button>
+        <button class="btn btn--ghost btn--sm" data-action="expand" data-id="{{item._id}}" bindtap="doAction">{{item.expanded ? '收起' : '看详情'}}</button>
+        <button class="btn btn--ghost btn--sm" data-action="report" data-id="{{item._id}}" bindtap="doAction">举报</button>
+      </view>
+    </view>
+  </block>
+
+  <view class="empty" wx:else>
+    <text class="empty-emoji">🫧</text>
+    <text class="empty-title">这里静悄悄的</text>
+    <text class="empty-sub">发第一张互助卡，说不定楼下就有人顺路</text>
+    <button class="btn btn--primary btn--sm" bindtap="scrollToInput">我来说一句 ✍️</button>
+  </view>
+  <view class="safe-bottom"></view>
+</view>

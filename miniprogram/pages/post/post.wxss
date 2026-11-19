@@ -1,0 +1,75 @@
+.tip-bubble {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  background: #FFFDF7;
+  border: 3rpx solid var(--ink);
+  border-radius: 999rpx;
+  padding: 12rpx 22rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 4rpx 5rpx 0 rgba(59,43,38,.12);
+  transform: rotate(-1deg);
+}
+.tip-face { font-size: 42rpx; animation: bob 3s ease-in-out infinite; }
+.tip-text { flex: 1; font-size: 23rpx; font-weight: 700; color: #6E5B4E; }
+
+.steps {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18rpx 20rpx;
+  background: #FFFDF7;
+}
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6rpx;
+  font-size: 21rpx;
+  font-weight: 800;
+  color: #B9A798;
+  min-width: 90rpx;
+}
+.step--on { color: var(--ink); }
+.step-dot {
+  width: 46rpx;
+  height: 46rpx;
+  border-radius: 50%;
+  border: 3rpx solid #D9C7B4;
+  background: #F6EFE6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+}
+.step--on .step-dot {
+  background: var(--yellow);
+  border-color: var(--ink);
+  box-shadow: 2rpx 3rpx 0 var(--ink);
+}
+.step-line {
+  flex: 1;
+  height: 4rpx;
+  background: repeating-linear-gradient(90deg, #E2D2C0 0 12rpx, transparent 12rpx 22rpx);
+  margin: 0 8rpx 22rpx;
+}
+.shoot {
+  height: 300rpx;
+  border: 4rpx dashed #C9AE92;
+  border-radius: 28rpx;
+  background: linear-gradient(135deg, #FFF7E4, #FFE9F1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+.shoot-image { width: 100%; height: 100%; }
+.shoot-emoji { font-size: 110rpx; line-height: 1.1; animation: bob 3s ease-in-out infinite; }
+.shoot-title { font-size: 28rpx; font-weight: 900; margin-top: 10rpx; }
+.shoot-sub { font-size: 21rpx; color: var(--ink2); margin-top: 4rpx; }
+
+/* 识图结果 */
+.recognition { background: #F3F8FF; }
+.recog-name { font-size: 34rpx; font-weight: 900; color: var(--ink); }

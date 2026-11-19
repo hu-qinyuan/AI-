@@ -1,0 +1,82 @@
+.preview-card {
+  background: #fff;
+  border: 3rpx solid var(--ink);
+  border-radius: 24rpx;
+  padding: 22rpx;
+  margin-bottom: 22rpx;
+  box-shadow: 4rpx 5rpx 0 rgba(59,43,38,.12);
+}
+.meta-line {
+  display: block;
+  font-size: 23rpx;
+  color: #6E5B4E;
+  margin-top: 6rpx;
+}
+.meta-box {
+  background: #FFFDF7;
+  border: 2rpx dashed #D9C7B4;
+  border-radius: 18rpx;
+  padding: 14rpx 18rpx;
+  margin-top: 14rpx;
+}
+.quote {
+  font-size: 22rpx;
+  color: var(--ink2);
+  background: #FFF3D6;
+  border-radius: 14rpx;
+  padding: 10rpx 16rpx;
+  margin-top: 14rpx;
+}
+.btn--recording {
+  background: #FFD9D4;
+  animation: twinkle 1s ease-in-out infinite;
+}
+
+/* 语音识别状态 */
+.speech-tip {
+  display: block;
+  margin-top: 10rpx;
+  color: var(--ink2);
+  line-height: 1.5;
+}
+.speech-tip--warn { color: #C2472F; font-weight: 700; }
+.live-text {
+  margin-top: 12rpx;
+  padding: 14rpx 16rpx;
+  border: 2rpx dashed #B9CFE8;
+  border-radius: 16rpx;
+  background: #F3F8FF;
+  font-size: 25rpx;
+  line-height: 1.5;
+  color: #33475B;
+}
+
+/* 示例句 / 解析明细 / 卡片画布 */
+.sample-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin-top: 16rpx;
+}
+.chip--sample {
+  font-size: 20rpx;
+  max-width: 100%;
+  white-space: normal;
+  line-height: 1.4;
+}
+.detect-box {
+  background: #F3F8FF;
+  border: 2rpx dashed #B9CFE8;
+  border-radius: 18rpx;
+  padding: 14rpx 18rpx;
+  margin-bottom: 20rpx;
+}
+.detect-box .tiny { display: block; margin-top: 6rpx; line-height: 1.5; }
+.notice--warn { background: #FFE3E0; }
+.card-canvas {
+  position: fixed;
+  left: -2000px;
+  top: 0;
+  width: 640px;
+  height: 880px;
+}

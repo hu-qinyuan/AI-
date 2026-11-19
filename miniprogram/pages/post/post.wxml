@@ -1,0 +1,182 @@
+<view class="page page--tab">
+  <view class="hero">
+    <text class="hero-mascot">📸</text>
+    <text class="hero-spark">✨</text>
+    <text class="hero-eyebrow">TAB 1 · AI 智造发布</text>
+    <text class="hero-title">拍一拍，闲置变故事</text>
+    <text class="hero-sub">3 步、60 秒，让旧物被下一位同学喜欢上</text>
+  </view>
+
+  <view class="tip-bubble">
+    <text class="tip-face">📦</text>
+    <text class="tip-text">宿宝说：{{tip}}</text>
+  </view>
+
+  <view class="notice" wx:if="{{modeText === '演示模式'}}">
+    <text>🧪</text>
+    <text>本地演示模式：数据存在本机。</text>
+  </view>
+
+  <!-- AI 接入状态：已接入显示真实模型，未接入明确显示原因与配置方法 -->
+  <view class="card ai-status {{aiState.allConnected ? 'ai-status--on' : ''}}" wx:if="{{aiState}}" bindtap="toggleState">
+    <view class="row row--between">
+      <view class="row gap">
+        <text class="ai-dot">{{aiState.allConnected ? '🟢' : '🟠'}}</text>
+        <text class="bold">{{aiState.allConnected ? 'AI 模型已接入 · ' + (aiState.providerName || '云端') : '显示工作流未接入'}}</text>
+      </view>
+      <text class="tiny">{{aiState.connectedCount}}/{{aiState.total}} 条通道 {{stateExpanded ? '收起 ▴' : '详情 ▾'}}</text>
+    </view>
+    <text class="tiny ai-hint">{{aiState.hint}}</text>
+    <block wx:if="{{stateExpanded}}">
+      <view class="ai-line" wx:for="{{aiState.channelList}}" wx:key="key">
+        <text>{{item.icon}} {{item.label}}</text>
+        <text class="tiny">{{item.statusText}}</text>
+      </view>
+      <view class="ai-guide" wx:if="{{!aiState.allConnected}}">
+        <text class="tiny">配置 AI_PROVIDER=tokenhub + AI_API_KEY（或 WF_A_URL / WF_B_URL / WF_C_URL），重新部署云函数即可。</text>
+      </view>
+      <view class="ai-guide" wx:if="{{aiState.allConnected}}">
+        <text class="tiny">视觉 {{aiState.visionModel || '未配置'}} · 文本 {{aiState.textModel || '未配置'}} · 密钥 {{aiState.keySource || '云端'}}</text>
+      </view>
+    </block>
+  </view>
+
+  <view class="card card--flat steps">
+    <view class="step {{step >= 1 ? 'step--on' : ''}}"><text class="step-dot">1</text><text>拍张照</text></view>
+    <view class="step-line"></view>
+    <view class="step {{step >= 2 ? 'step--on' : ''}}"><text class="step-dot">2</text><text>AI 写</text></view>
+    <view class="step-line"></view>
+    <view class="step {{step >= 3 ? 'step--on' : ''}}"><text class="step-dot">3</text><text>发出去</text></view>
+  </view>
+
+  <!-- 步骤 1：图片 -->
+  <view class="card">
+    <view class="card-title"><text class="card-title-emoji">1️⃣</text><text>先拍张照</text></view>
+    <view class="shoot" bindtap="choosePic">
+      <image wx:if="{{imagePath}}" class="shoot-image" src="{{imagePath}}" mode="aspectFill"></image>
+      <block wx:else>
+        <text class="shoot-emoji">{{coverEmoji}}</text>
+        <text class="shoot-title">点这里拍照 / 从相册选</text>
+        <text class="shoot-sub">只取第一张 · 自动压缩 · ≤10MB</text>
+      </block>
+    </view>
+    <view class="row gap" style="margin-top:18rpx">
+      <view class="chip" bindtap="choosePic">📷 {{picButtonText}}</view>
+      <view class="chip" bindtap="useDemoPic">🎲 用示例图</view>
+    </view>
+    <text class="tiny warn" wx:if="{{imageTooLarge}}">⚠️ 图片较大，将改用云存储链接交给模型识别。</text>
+    <view class="field" style="margin-top:22rpx">
+      <text class="field-label">补充一句 <text class="tiny">可选</text></text>
+      <input class="input" placeholder="例：大一买的，用了半年" value="{{hint}}" bindinput="onHintInput" maxlength="40" />
+    </view>
+  </view>
+
+  <!-- 步骤 2：风格 -->
+  <view class="card">
+    <view class="card-title"><text class="card-title-emoji">2️⃣</text><text>挑个文案性格</text></view>
+    <view class="chip-row">
+      <view wx:for="{{styles}}" wx:key="key" class="chip {{styleIndex === index ? 'chip--on' : ''}}" data-index="{{index}}" bindtap="selectStyle">{{item.emoji}} {{item.name}}</view>
+    </view>
+    <text class="tiny" style="display:block;margin-top:14rpx">风格锚点：{{styleHint}}</text>
+    <button class="btn btn--primary btn--block" style="margin-top:22rpx" bindtap="generate" disabled="{{generating}}">{{generating ? '✨ AI 正在识图写文案…' : '✨ AI 识图 + 写文案'}}</button>
+  </view>
+
+  <view class="card" wx:if="{{generating}}">
+    <view class="skeleton skeleton-box"></view>
+    <view class="skeleton skeleton-line" style="margin-top:20rpx"></view>
+    <view class="skeleton skeleton-line skeleton-line--short"></view>
+    <text class="tiny">正在识图并写文案…</text>
+  </view>
+
+  <!-- 识图结果：可确认、可切换候选，杜绝「随机编一个物品」 -->
+  <view class="card recognition pop" wx:if="{{recognized}}">
+    <view class="card-title"><text class="card-title-emoji">🔍</text><text>AI 识图结果</text><text class="tiny">（认错了就点一下）</text></view>
+    <view class="row gap row--wrap">
+      <text class="recog-name">{{recognized.itemName || '未确认物品'}}</text>
+      <text class="badge {{recognized.imageRecognized ? 'badge--green' : 'badge--gray'}}">{{recognized.imageRecognized ? '模型已看图' : '本地推断'}}</text>
+      <text class="badge badge--blue">置信度 {{confidenceText}}</text>
+    </view>
+    <text class="tiny">来源：{{sourceText}}</text>
+    <text class="tiny" wx:if="{{featuresText}}">可见特征：{{featuresText}}</text>
+    <view class="chip-row" wx:if="{{recognized.candidates.length > 0}}">
+      <text class="tiny" style="width:100%">换成别的物品：</text>
+      <view wx:for="{{recognized.candidates}}" wx:key="name" class="chip {{chosenItem === item.name ? 'chip--on' : ''}}" data-name="{{item.name}}" bindtap="chooseCandidate">{{item.name}}</view>
+    </view>
+    <text class="tiny warn" wx:if="{{!recognized.imageRecognized}}">⚠️ 本地规则引擎不会看图：接入视觉模型后才会真正识别照片里的物品。当前请点选候选或补一句描述。</text>
+  </view>
+
+  <view class="notice" wx:if="{{notice}}"><text>💡</text><text>{{notice}}</text></view>
+
+  <!-- 步骤 3：表单 -->
+  <view class="card pop" wx:if="{{showForm}}">
+    <view class="sticker">可随意改 ✍️</view>
+    <view class="card-title"><text class="card-title-emoji">3️⃣</text><text>确认一下就能发</text></view>
+
+    <view class="field">
+      <text class="field-label">标题 <text class="field-label-req">*</text></text>
+      <input class="input" value="{{form.title}}" data-field="title" bindinput="onFieldInput" maxlength="20" placeholder="≤20 字" />
+    </view>
+    <view class="field">
+      <text class="field-label">故事正文 <text class="field-label-req">*</text></text>
+      <textarea class="textarea" value="{{form.desc}}" data-field="desc" bindinput="onFieldInput" maxlength="200" placeholder="说说它的来历，≤200 字" />
+    </view>
+    <view class="field">
+      <text class="field-label">类别 <text class="field-label-req">*</text></text>
+      <picker range="{{categories}}" value="{{categoryIndex}}" bindchange="onCategoryChange">
+        <view class="picker">{{form.category}}<text class="picker-arrow">▾</text></view>
+      </picker>
+    </view>
+    <view class="field">
+      <text class="field-label">成色</text>
+      <picker range="{{conditions}}" value="{{conditionIndex}}" bindchange="onConditionChange">
+        <view class="picker">{{form.condition}}<text class="picker-arrow">▾</text></view>
+      </picker>
+    </view>
+    <view class="field">
+      <text class="field-label">建议价（0 = 免费赠送）</text>
+      <input class="input" type="digit" value="{{form.price}}" data-field="price" bindinput="onFieldInput" placeholder="0" />
+    </view>
+    <view class="field">
+      <text class="field-label">流转方式</text>
+      <picker range="{{dealModes}}" value="{{dealIndex}}" bindchange="onDealChange">
+        <view class="picker">{{form.dealMode}}<text class="picker-arrow">▾</text></view>
+      </picker>
+    </view>
+    <view class="field">
+      <text class="field-label">取件楼栋 <text class="field-label-req">*</text></text>
+      <picker range="{{buildings}}" value="{{buildingIndex}}" bindchange="onBuildingChange">
+        <view class="picker">{{form.building}}<text class="picker-arrow">▾</text></view>
+      </picker>
+    </view>
+    <view class="field">
+      <text class="field-label">房间号 <text class="tiny">已记住 · 对外隐藏</text></text>
+      <input class="input" value="{{form.room}}" data-field="room" bindinput="onFieldInput" placeholder="例：312" maxlength="10" />
+    </view>
+    <view class="field">
+      <text class="field-label">标签</text>
+      <view class="row row--wrap">
+        <text wx:for="{{form.tags}}" wx:key="*this" class="tag tag--purple">{{item}}</text>
+      </view>
+      <view class="row gap" style="margin-top:10rpx">
+        <input class="input" style="flex:1" value="{{tagInput}}" bindinput="onTagInput" placeholder="加个关键词" maxlength="10" />
+        <view class="chip" bindtap="addTag">＋ 加</view>
+      </view>
+    </view>
+
+    <view class="row gap" style="margin-top:8rpx">
+      <button class="btn btn--ghost btn--block" style="flex:1" bindtap="regenerateCopy" disabled="{{generating}}">🔄 换一版文案</button>
+    </view>
+    <button class="btn btn--yellow btn--block" style="margin-top:14rpx" bindtap="publish" disabled="{{publishing}}">🚀 一键发布到广场</button>
+  </view>
+
+  <view class="card card--mint" bindtap="goFeed">
+    <view class="row row--between">
+      <view>
+        <text class="bold" style="display:block;font-size:28rpx">🏘️ 去社区广场逛逛</text>
+        <text class="tiny">看看楼上楼下都在传些什么好东西</text>
+      </view>
+      <text style="font-size:40rpx">→</text>
+    </view>
+  </view>
+  <view class="safe-bottom"></view>
+</view>
